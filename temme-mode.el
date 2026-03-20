@@ -63,6 +63,7 @@
   "HTML tags that should render without a closing tag.")
 
 (defun temme--alnum-or-symbol-p (char)
+  "Return non-nil when CHAR is valid in a tag or attribute name."
   (or (and (>= char ?a) (<= char ?z))
       (and (>= char ?A) (<= char ?Z))
       (and (>= char ?0) (<= char ?9))
@@ -71,16 +72,19 @@
       (eq char ?:)))
 
 (defun temme--attr-char-p (char)
+  "Return non-nil when CHAR may appear in an unquoted attribute token."
   (and char
        (not (memq char '(?\s ?\t ?\n ?\] ?= ?\" ?\')))))
 
 (defun temme--skip-space (input pos)
+  "Advance POS past ASCII whitespace in INPUT and return the new position."
   (while (and (< pos (length input))
               (memq (aref input pos) '(?\s ?\t ?\n)))
     (setq pos (1+ pos)))
   pos)
 
 (defun temme--parse-name (input pos)
+  "Parse a tag, class, or attribute name from INPUT starting at POS."
   (let ((start pos))
     (while (and (< pos (length input))
                 (temme--alnum-or-symbol-p (aref input pos)))
@@ -99,6 +103,7 @@
     (cons (substring input start pos) (1+ pos))))
 
 (defun temme--parse-number (input pos)
+  "Parse a decimal repeat count from INPUT starting at POS."
   (let ((start pos))
     (while (and (< pos (length input))
                 (<= ?0 (aref input pos))
@@ -121,6 +126,7 @@
     (cons (substring input start pos) (1+ pos))))
 
 (defun temme--parse-attr-name (input pos)
+  "Parse an attribute name from INPUT starting at POS."
   (let ((start pos))
     (while (and (< pos (length input))
                 (temme--attr-char-p (aref input pos)))
@@ -130,6 +136,7 @@
     (cons (substring input start pos) pos)))
 
 (defun temme--parse-attr-value (input pos)
+  "Parse an attribute value from INPUT starting at POS."
   (setq pos (temme--skip-space input pos))
   (when (>= pos (length input))
     (error "Expected an attribute value"))
@@ -146,6 +153,7 @@
        (cons (substring input start pos) pos)))))
 
 (defun temme--parse-attrs (input pos)
+  "Parse a bracketed attribute list from INPUT starting at POS."
   (setq pos (1+ pos))
   (let (attrs
         done)
@@ -169,6 +177,7 @@
     (cons (nreverse attrs) pos)))
 
 (defun temme--clone-node (node)
+  "Deep-copy NODE and its children."
   (let ((clone (make-temme-node
                 :tag (temme-node-tag node)
                 :id (temme-node-id node)
@@ -183,6 +192,7 @@
     clone))
 
 (defun temme--clone-fragment (fragment)
+  "Deep-copy FRAGMENT, preserving path structure in the clone."
   (let ((map (make-hash-table :test #'eq)))
     (make-temme-fragment
      :roots
@@ -205,6 +215,7 @@
                     (temme-fragment-paths fragment)))))
 
 (defun temme--repeat-fragment (fragment count)
+  "Return FRAGMENT repeated COUNT times as sibling roots."
   (if (<= count 1)
       fragment
     (let (roots last-path)
@@ -215,11 +226,13 @@
       (make-temme-fragment :roots roots :paths last-path))))
 
 (defun temme--group-fragment (fragment)
+  "Treat FRAGMENT as a group whose roots become the active paths."
   (make-temme-fragment
    :roots (temme-fragment-roots fragment)
    :paths (mapcar #'list (temme-fragment-roots fragment))))
 
 (defun temme--path-prefix (path length)
+  "Return the prefix of PATH with at most LENGTH nodes."
   (cl-subseq path 0 (max 0 (min length (length path)))))
 
 (defun temme--attach-fragment (roots basis-paths fragment)
@@ -246,6 +259,7 @@
                          :paths (temme-fragment-paths fragment))))
 
 (defun temme--parse-element (input pos)
+  "Parse a single element abbreviation from INPUT starting at POS."
   (setq pos (temme--skip-space input pos))
   (let ((tag nil)
         (id nil)
@@ -305,6 +319,7 @@
           pos)))
 
 (defun temme--parse-primary (input pos)
+  "Parse a primary expression from INPUT starting at POS."
   (setq pos (temme--skip-space input pos))
   (when (>= pos (length input))
     (error "Unexpected end of abbreviation"))
@@ -331,6 +346,7 @@
             next-pos))))
 
 (defun temme--parse-expression (input &optional pos)
+  "Parse an abbreviation expression from INPUT starting at POS."
   (setq pos (or pos 0))
   (pcase-let ((`(,first-fragment . ,next-pos)
                (temme--parse-primary input pos)))
@@ -382,6 +398,7 @@
     nodes))
 
 (defun temme--attrs (node)
+  "Render NODE attributes into an HTML attribute string."
   (let ((id (temme-node-id node))
         (classes (copy-sequence (temme-node-classes node)))
         other-attrs)
@@ -409,9 +426,11 @@
       (apply #'concat (nreverse attrs)))))
 
 (defun temme--indent-string (indent)
+  "Return a string of INDENT spaces."
   (make-string (max 0 indent) ?\s))
 
 (defun temme--render-once (node indent)
+  "Render NODE once at INDENT spaces, ignoring its repeat count."
   (let ((tag (temme-node-tag node))
         (text (temme-node-text node))
         (children (temme-node-children node))
@@ -465,6 +484,7 @@ BASE-INDENT is the number of spaces to prepend to top-level elements."
    ""))
 
 (defun temme--bounds-of-abbrev ()
+  "Return the bounds of the abbreviation around point."
   (save-excursion
     (skip-chars-backward "^ \t\n\r")
     (let ((start (point)))
