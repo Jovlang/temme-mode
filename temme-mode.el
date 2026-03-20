@@ -18,9 +18,14 @@
 ;;
 ;;   div                              => <div></div>
 ;;   main#app.shell                   => <main id="app" class="shell"></main>
+;;   #root.card                       => default tag with id/class shorthand
 ;;   ul>li.item*2                     => nested repeated children
+;;   h1.title{Hello}+p{World}         => siblings with text nodes
+;;   div>section>p^aside              => climb up to add a sibling higher up
 ;;   div>(header>h1{Title})+p{Body}   => grouped nested layout
+;;   (header+main)>p                  => children added to each group root
 ;;   figure>img.hero[src=cover.jpg]/  => self-closing child
+;;   ul>(li>a)*2                      => repeated groups
 ;;
 ;; The main entry point is `temme-expand'.
 
