@@ -1,7 +1,7 @@
 # temme-mode
 
-`temme-mode` is a small Emacs minor mode that implements a focused subset of
-Emmet-style abbreviations from scratch.
+`temme-mode` is a rewrite of emmet-mode, aiming for a clean and modern codebase
+while implementing all the useful features of Emmet (WIP).
 
 ## Table of contents
 

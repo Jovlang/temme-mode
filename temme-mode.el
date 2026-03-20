@@ -1,13 +1,14 @@
-;;; temme-mode.el --- Tiny Emmet-like expansions -*- lexical-binding: t; -*-
+;;; temme-mode.el --- Emmet rewrite for Emacs -*- lexical-binding: t; -*-
 
-;; Author: Codex, Claude
+;; Author: Lycomedes1814, GPT-5.4, Opus 4.6
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: convenience, editing
 
 ;;; Commentary:
 
-;; `temme-mode' expands a focused subset of Emmet-style abbreviations.
+;; `temme-mode' is a rewrite of emmet-mode, aiming for a clean and modern
+;; codebase while implementing all the useful features of Emmet (WIP).
 ;;
 ;; Supported features include plain tags, `#id' and `.class' shorthands,
 ;; bracket attributes, text nodes, child/sibling/climb-up operators,

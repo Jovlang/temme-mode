@@ -1,6 +1,6 @@
 # temme-mode
 
-Single-file Emacs minor mode (`temme-mode.el`) implementing Emmet-style HTML abbreviation expansion from scratch. Emacs Lisp, lexical binding, requires Emacs 27.1+.
+Single-file Emacs minor mode (`temme-mode.el`) — a rewrite of emmet-mode aiming for a clean and modern codebase while implementing all the useful features of Emmet (WIP). Emacs Lisp, lexical binding, requires Emacs 27.1+.
 
 ## Project layout
 
