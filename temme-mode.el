@@ -94,6 +94,8 @@
     (while (and (< pos (length input))
                 (temme--alnum-or-symbol-p (aref input pos)))
       (setq pos (1+ pos)))
+    (when (= start pos)
+      (error "Expected a name"))
     (cons (substring input start pos) pos)))
 
 (defun temme--parse-text (input pos)
@@ -221,14 +223,18 @@
 
 (defun temme--repeat-fragment (fragment count)
   "Return FRAGMENT repeated COUNT times as sibling roots."
-  (if (<= count 1)
-      fragment
+  (cond
+   ((<= count 0)
+    (make-temme-fragment :roots nil :paths nil))
+   ((= count 1)
+    fragment)
+   (t
     (let (roots last-path)
       (dotimes (_ count)
         (let ((copy (temme--clone-fragment fragment)))
           (setq roots (append roots (temme-fragment-roots copy))
                 last-path (temme-fragment-paths copy))))
-      (make-temme-fragment :roots roots :paths last-path))))
+      (make-temme-fragment :roots roots :paths last-path)))))
 
 (defun temme--group-fragment (fragment)
   "Treat FRAGMENT as a group whose roots become the active paths."
@@ -420,15 +426,30 @@
          (push attr other-attrs))))
     (let (attrs)
       (when id
-        (push (format " id=\"%s\"" id) attrs))
+        (push (format " id=\"%s\"" (temme--escape-attr-value id)) attrs))
       (when classes
-        (push (format " class=\"%s\"" (string-join classes " ")) attrs))
+        (push (format " class=\"%s\""
+                      (temme--escape-attr-value (string-join classes " ")))
+              attrs))
       (dolist (attr (nreverse other-attrs))
         (push (if (eq (cdr attr) t)
                   (format " %s" (car attr))
-                (format " %s=\"%s\"" (car attr) (cdr attr)))
+                  (format " %s=\"%s\""
+                          (car attr)
+                          (temme--escape-attr-value (cdr attr))))
               attrs))
       (apply #'concat (nreverse attrs)))))
+
+(defun temme--escape-text (text)
+  "Escape TEXT for HTML text content."
+  (setq text (string-replace "&" "&amp;" text))
+  (setq text (string-replace "<" "&lt;" text))
+  (string-replace ">" "&gt;" text))
+
+(defun temme--escape-attr-value (text)
+  "Escape TEXT for an HTML attribute value."
+  (setq text (temme--escape-text text))
+  (string-replace "\"" "&quot;" text))
 
 (defun temme--indent-string (indent)
   "Return a string of INDENT spaces."
@@ -443,9 +464,8 @@
                           (member-ignore-case (temme-node-tag node)
                                               temme-void-tags))))
     (cond
-     ;; Children take priority over self-closing: if the user explicitly
-     ;; nests children under a void tag, render them rather than silently
-     ;; dropping them.
+     ((and text children)
+      (error "Mixed text and child elements are not supported"))
      (children
         (format "%s<%s%s>\n%s%s</%s>\n"
                 (temme--indent-string indent)
@@ -468,14 +488,14 @@
               (temme--indent-string indent)
               tag
               (temme--attrs node)
-              (or text "")
+              (if text (temme--escape-text text) "")
               tag)))))
 
 (defun temme-render-node (node &optional indent)
   "Render NODE into an HTML snippet."
   (let ((ind (or indent 0))
         (parts nil))
-    (dotimes (_ (max 1 (temme-node-repeat node)))
+    (dotimes (_ (max 0 (temme-node-repeat node)))
       (push (temme--render-once node ind) parts))
     (apply #'concat (nreverse parts))))
 

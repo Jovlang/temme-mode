@@ -55,10 +55,29 @@
    (equal (temme-expand-string "ul>(li>a)*2")
           "<ul>\n  <li>\n    <a></a>\n  </li>\n  <li>\n    <a></a>\n  </li>\n</ul>\n")))
 
+(ert-deftest temme-expand-zero-repeat-produces-no-output ()
+  (should (equal (temme-expand-string "li*0") ""))
+  (should (equal (temme-expand-string "(li>a)*0") "")))
+
 (ert-deftest temme-expand-climb-up ()
   (should
    (equal (temme-expand-string "div>section>p^aside")
           "<div>\n  <section>\n    <p></p>\n  </section>\n  <aside></aside>\n</div>\n")))
+
+(ert-deftest temme-expand-escapes-text-and-attribute-values ()
+  (should
+   (equal (temme-expand-string "p{<x>&}")
+          "<p>&lt;x&gt;&amp;</p>\n"))
+  (should
+   (equal (temme-expand-string "div[data-x='a&b\"c<d>']")
+          "<div data-x=\"a&amp;b&quot;c&lt;d&gt;\"></div>\n")))
+
+(ert-deftest temme-expand-rejects-empty-shorthand-names ()
+  (should-error (temme-expand-string "div."))
+  (should-error (temme-expand-string "#")))
+
+(ert-deftest temme-expand-rejects-text-on-parent-elements ()
+  (should-error (temme-expand-string "div{a}>span")))
 
 (ert-deftest temme-expand-command-replaces-region ()
   (with-temp-buffer
