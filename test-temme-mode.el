@@ -111,7 +111,7 @@
 
 (ert-deftest temme-expand-snippet-a-link ()
   (should (equal (temme-expand-string "a:link")
-                 "<a href=\"http://\"></a>\n")))
+                 "<a href=\"https://\"></a>\n")))
 
 (ert-deftest temme-expand-snippet-a-mail ()
   (should (equal (temme-expand-string "a:mail")
@@ -168,12 +168,12 @@
   (should (equal (temme-expand-string "div>btn.primary{Go}+a:link")
                  (concat "<div>\n"
                          "  <button class=\"primary\">Go</button>\n"
-                         "  <a href=\"http://\"></a>\n"
+                         "  <a href=\"https://\"></a>\n"
                          "</div>\n"))))
 
 (ert-deftest temme-expand-snippet-attr-override ()
   (should (equal (temme-expand-string "a:link[href=https://example.com]")
-                 "<a href=\"http://\" href=\"https://example.com\"></a>\n")))
+                 "<a href=\"https://\" href=\"https://example.com\"></a>\n")))
 
 (ert-deftest temme-expand-snippet-ul-plus ()
   (should (equal (temme-expand-string "ul+")

@@ -33,7 +33,7 @@
 ;;   !              => HTML5 boilerplate (doctype, html, head, body)
 ;;   !!!            => <!DOCTYPE html>
 ;;   btn            => <button></button>
-;;   a:link         => <a href="http://"></a>
+;;   a:link         => <a href="https://"></a>
 ;;   link:css       => <link rel="stylesheet" href="" />
 ;;   script:src     => <script src=""></script>
 ;;   input:text     => <input type="text" ... />
@@ -112,7 +112,7 @@
     ("sum"           :tag "summary")
     ("dat"           :tag "data")
     ;; Links
-    ("a:link"        :tag "a"      :attrs (("href" . "http://")))
+    ("a:link"        :tag "a"      :attrs (("href" . "https://")))
     ("a:mail"        :tag "a"      :attrs (("href" . "mailto:")))
     ("a:tel"         :tag "a"      :attrs (("href" . "tel:+")))
     ;; Stylesheet and script

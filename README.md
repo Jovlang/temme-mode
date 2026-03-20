@@ -219,7 +219,7 @@ btn.primary{Submit}
 
 | Abbreviation | Expansion |
 |---|---|
-| `a:link` | `<a href="http://"></a>` |
+| `a:link` | `<a href="https://"></a>` |
 | `a:mail` | `<a href="mailto:"></a>` |
 | `a:tel` | `<a href="tel:+"></a>` |
 | `link:css` | `<link rel="stylesheet" href="" />` |
