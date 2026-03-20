@@ -3,6 +3,17 @@
 `temme-mode` is a small Emacs minor mode that implements a focused subset of
 Emmet-style abbreviations from scratch.
 
+## Table of contents
+
+- [Features](#features)
+- [Examples](#examples)
+- [Snippets](#snippets)
+  - [Raw snippets](#raw-snippets)
+  - [Tag aliases](#tag-aliases)
+  - [Element snippets](#element-snippets)
+- [Field navigation](#field-navigation)
+- [Running tests](#running-tests)
+
 ## Features
 
 - Tag expansion: `div`
