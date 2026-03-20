@@ -26,7 +26,7 @@
 - [ ] `|t` trim
 
 ## Snippets / aliases
-- [ ] Built-in snippets: `!` (HTML5 boilerplate), `a:link`, `input:text`, `btn`, `link:css`, `script:src`, etc.
+- [x] Built-in snippets: `!` (HTML5 boilerplate), `a:link`, `input:text`, `btn`, `link:css`, `script:src`, etc.
 - [ ] Custom user-defined snippets
 
 ## Advanced text

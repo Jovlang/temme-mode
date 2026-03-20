@@ -99,4 +99,104 @@
     (should (equal (buffer-string)
                    "    <section>\n      <p>Hi</p>\n    </section>\n"))))
 
+;; --- Snippet tests ---
+
+(ert-deftest temme-expand-snippet-btn ()
+  (should (equal (temme-expand-string "btn")
+                 "<button></button>\n")))
+
+(ert-deftest temme-expand-snippet-btn-with-class ()
+  (should (equal (temme-expand-string "btn.primary{Submit}")
+                 "<button class=\"primary\">Submit</button>\n")))
+
+(ert-deftest temme-expand-snippet-a-link ()
+  (should (equal (temme-expand-string "a:link")
+                 "<a href=\"http://\"></a>\n")))
+
+(ert-deftest temme-expand-snippet-a-mail ()
+  (should (equal (temme-expand-string "a:mail")
+                 "<a href=\"mailto:\"></a>\n")))
+
+(ert-deftest temme-expand-snippet-link-css ()
+  (should (equal (temme-expand-string "link:css")
+                 "<link rel=\"stylesheet\" href=\"\" />\n")))
+
+(ert-deftest temme-expand-snippet-link-favicon ()
+  (should (equal (temme-expand-string "link:favicon")
+                 "<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\" />\n")))
+
+(ert-deftest temme-expand-snippet-script-src ()
+  (should (equal (temme-expand-string "script:src")
+                 "<script src=\"\"></script>\n")))
+
+(ert-deftest temme-expand-snippet-input-text ()
+  (should (equal (temme-expand-string "input:text")
+                 "<input id=\"\" type=\"text\" name=\"\" />\n")))
+
+(ert-deftest temme-expand-snippet-input-hidden ()
+  (should (equal (temme-expand-string "input:h")
+                 "<input type=\"hidden\" name=\"\" />\n")))
+
+(ert-deftest temme-expand-snippet-input-checkbox ()
+  (should (equal (temme-expand-string "input:c")
+                 "<input id=\"\" type=\"checkbox\" name=\"\" />\n")))
+
+(ert-deftest temme-expand-snippet-input-submit ()
+  (should (equal (temme-expand-string "input:s")
+                 "<input type=\"submit\" value=\"\" />\n")))
+
+(ert-deftest temme-expand-snippet-form-post ()
+  (should (equal (temme-expand-string "form:post")
+                 "<form action=\"\" method=\"post\"></form>\n")))
+
+(ert-deftest temme-expand-snippet-meta-vp ()
+  (should (equal (temme-expand-string "meta:vp")
+                 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n")))
+
+(ert-deftest temme-expand-snippet-tag-aliases ()
+  (should (equal (temme-expand-string "bq") "<blockquote></blockquote>\n"))
+  (should (equal (temme-expand-string "sect") "<section></section>\n"))
+  (should (equal (temme-expand-string "hdr") "<header></header>\n"))
+  (should (equal (temme-expand-string "ftr") "<footer></footer>\n"))
+  (should (equal (temme-expand-string "fig") "<figure></figure>\n"))
+  (should (equal (temme-expand-string "str") "<strong></strong>\n"))
+  (should (equal (temme-expand-string "mn") "<main></main>\n"))
+  (should (equal (temme-expand-string "dlg") "<dialog></dialog>\n"))
+  (should (equal (temme-expand-string "det") "<details></details>\n")))
+
+(ert-deftest temme-expand-snippet-in-expression ()
+  (should (equal (temme-expand-string "div>btn.primary{Go}+a:link")
+                 (concat "<div>\n"
+                         "  <button class=\"primary\">Go</button>\n"
+                         "  <a href=\"http://\"></a>\n"
+                         "</div>\n"))))
+
+(ert-deftest temme-expand-snippet-attr-override ()
+  (should (equal (temme-expand-string "a:link[href=https://example.com]")
+                 "<a href=\"http://\" href=\"https://example.com\"></a>\n")))
+
+(ert-deftest temme-expand-snippet-ul-plus ()
+  (should (equal (temme-expand-string "ul+")
+                 "<ul>\n  <li></li>\n</ul>\n")))
+
+(ert-deftest temme-expand-snippet-dl-plus ()
+  (should (equal (temme-expand-string "dl+")
+                 "<dl>\n  <dt></dt>\n  <dd></dd>\n</dl>\n")))
+
+(ert-deftest temme-expand-snippet-table-plus ()
+  (should (equal (temme-expand-string "table+")
+                 "<table>\n  <tr>\n    <td></td>\n  </tr>\n</table>\n")))
+
+(ert-deftest temme-expand-snippet-select-plus ()
+  (should (equal (temme-expand-string "select+")
+                 "<select>\n  <option value=\"\"></option>\n</select>\n")))
+
+(ert-deftest temme-expand-raw-snippet-bang ()
+  (should (string-prefix-p "<!DOCTYPE html>" (temme-expand-string "!")))
+  (should (string-match-p "<html lang=\"en\">" (temme-expand-string "!")))
+  (should (string-match-p "<title>Document</title>" (temme-expand-string "!"))))
+
+(ert-deftest temme-expand-raw-snippet-triple-bang ()
+  (should (equal (temme-expand-string "!!!") "<!DOCTYPE html>\n")))
+
 ;;; test-temme-mode.el ends here

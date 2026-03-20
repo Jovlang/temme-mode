@@ -15,6 +15,7 @@ Emmet-style abbreviations from scratch.
 - Multipliers: `li*3`
 - Text nodes: `p{Hello}`
 - Indented output starting at the current line indentation
+- Built-in snippets for common patterns (`!`, `btn`, `a:link`, `link:css`, `input:text`, etc.)
 - Interactive expansion command: `M-x temme-expand` or `C-c ,`
 
 ## Examples
@@ -157,6 +158,99 @@ Output:
   </li>
 </ul>
 ```
+
+## Snippets
+
+Snippets expand common abbreviations into full HTML elements with default
+attributes. They are composable with classes, ids, attributes, and operators.
+
+### Raw snippets
+
+These expand when used as the entire abbreviation:
+
+| Abbreviation | Output |
+|---|---|
+| `!` / `doc` | HTML5 boilerplate (doctype, html, head, body) |
+| `!!!` | `<!DOCTYPE html>` |
+| `ul+` | `<ul>` with a nested `<li>` |
+| `ol+` | `<ol>` with a nested `<li>` |
+| `dl+` | `<dl>` with nested `<dt>` and `<dd>` |
+| `table+` | `<table>` with nested `<tr>` and `<td>` |
+| `select+` | `<select>` with a nested `<option>` |
+
+### Tag aliases
+
+| Abbreviation | Tag |
+|---|---|
+| `btn` | `button` |
+| `bq` | `blockquote` |
+| `fig` / `figc` | `figure` / `figcaption` |
+| `sect` | `section` |
+| `art` | `article` |
+| `hdr` / `ftr` | `header` / `footer` |
+| `mn` | `main` |
+| `str` | `strong` |
+| `dlg` | `dialog` |
+| `det` / `sum` | `details` / `summary` |
+| `pic` | `picture` |
+| `ifr` | `iframe` |
+| `fset` / `fst` | `fieldset` |
+| `leg` | `legend` |
+| `tarea` | `textarea` |
+| `adr` | `address` |
+| `tem` | `template` |
+| `prog` | `progress` |
+| `out` | `output` |
+| `dat` | `data` |
+| `emb` / `obj` | `embed` / `object` |
+| `cap` / `colg` | `caption` / `colgroup` |
+
+### Element snippets
+
+These can be combined with classes, ids, attributes, and operators:
+
+```text
+btn.primary{Submit}
+```
+
+```html
+<button class="primary">Submit</button>
+```
+
+| Abbreviation | Expansion |
+|---|---|
+| `a:link` | `<a href="http://"></a>` |
+| `a:mail` | `<a href="mailto:"></a>` |
+| `a:tel` | `<a href="tel:+"></a>` |
+| `link:css` | `<link rel="stylesheet" href="" />` |
+| `link:favicon` | `<link rel="icon" type="image/x-icon" href="favicon.ico" />` |
+| `script:src` | `<script src=""></script>` |
+| `inp` / `input:text` / `input:t` | `<input type="text" />` |
+| `input:hidden` / `input:h` | `<input type="hidden" />` |
+| `input:password` / `input:p` | `<input type="password" />` |
+| `input:email` | `<input type="email" />` |
+| `input:url` | `<input type="url" />` |
+| `input:search` | `<input type="search" />` |
+| `input:checkbox` / `input:c` | `<input type="checkbox" />` |
+| `input:radio` / `input:r` | `<input type="radio" />` |
+| `input:submit` / `input:s` | `<input type="submit" />` |
+| `input:button` / `input:b` | `<input type="button" />` |
+| `input:reset` | `<input type="reset" />` |
+| `input:file` | `<input type="file" />` |
+| `input:image` / `input:i` | `<input type="image" />` |
+| `input:number` | `<input type="number" />` |
+| `input:range` | `<input type="range" />` |
+| `input:date` | `<input type="date" />` |
+| `input:color` | `<input type="color" />` |
+| `form:get` | `<form action="" method="get"></form>` |
+| `form:post` | `<form action="" method="post"></form>` |
+| `video:src` | `<video src=""></video>` |
+| `audio:src` | `<audio src=""></audio>` |
+| `meta:utf` | `<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />` |
+| `meta:vp` | `<meta name="viewport" content="width=device-width, initial-scale=1.0" />` |
+| `meta:compat` | `<meta http-equiv="X-UA-Compatible" content="IE=edge" />` |
+| `meta:desc` | `<meta name="description" content="" />` |
+| `meta:kw` | `<meta name="keywords" content="" />` |
 
 ## Running tests
 

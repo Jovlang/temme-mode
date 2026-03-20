@@ -11,8 +11,9 @@
 ;;
 ;; Supported features include plain tags, `#id' and `.class' shorthands,
 ;; bracket attributes, text nodes, child/sibling/climb-up operators,
-;; grouping, multipliers, indentation-aware expansion, and self-closing
-;; output for void HTML elements or explicit `.../' abbreviations.
+;; grouping, multipliers, indentation-aware expansion, self-closing
+;; output for void HTML elements or explicit `.../' abbreviations,
+;; and built-in snippets for common patterns.
 ;;
 ;; Examples:
 ;;
@@ -26,6 +27,24 @@
 ;;   (header+main)>p                  => children added to each group root
 ;;   figure>img.hero[src=cover.jpg]/  => self-closing child
 ;;   ul>(li>a)*2                      => repeated groups
+;;
+;; Built-in snippets:
+;;
+;;   !              => HTML5 boilerplate (doctype, html, head, body)
+;;   !!!            => <!DOCTYPE html>
+;;   btn            => <button></button>
+;;   a:link         => <a href="http://"></a>
+;;   link:css       => <link rel="stylesheet" href="" />
+;;   script:src     => <script src=""></script>
+;;   input:text     => <input type="text" ... />
+;;   form:post      => <form action="" method="post"></form>
+;;   meta:vp        => <meta name="viewport" ... />
+;;   ul+            => <ul> with nested <li>
+;;
+;; Snippets are composable with classes, ids, attributes, and operators:
+;;
+;;   btn.primary{Submit}              => <button class="primary">Submit</button>
+;;   div>a:link+script:src            => nested snippet siblings
 ;;
 ;; The main entry point is `temme-expand'.
 
@@ -61,6 +80,131 @@
   "Number of spaces to indent nested elements."
   :type 'integer
   :group 'temme)
+
+(defconst temme--snippets
+  '(;; Tag aliases
+    ("btn"           :tag "button")
+    ("bq"            :tag "blockquote")
+    ("fig"           :tag "figure")
+    ("figc"          :tag "figcaption")
+    ("pic"           :tag "picture")
+    ("ifr"           :tag "iframe")
+    ("emb"           :tag "embed")
+    ("obj"           :tag "object")
+    ("cap"           :tag "caption")
+    ("colg"          :tag "colgroup")
+    ("fset"          :tag "fieldset")
+    ("fst"           :tag "fieldset")
+    ("leg"           :tag "legend")
+    ("tarea"         :tag "textarea")
+    ("sect"          :tag "section")
+    ("art"           :tag "article")
+    ("hdr"           :tag "header")
+    ("ftr"           :tag "footer")
+    ("adr"           :tag "address")
+    ("dlg"           :tag "dialog")
+    ("str"           :tag "strong")
+    ("prog"          :tag "progress")
+    ("mn"            :tag "main")
+    ("tem"           :tag "template")
+    ("out"           :tag "output")
+    ("det"           :tag "details")
+    ("sum"           :tag "summary")
+    ("dat"           :tag "data")
+    ;; Links
+    ("a:link"        :tag "a"      :attrs (("href" . "http://")))
+    ("a:mail"        :tag "a"      :attrs (("href" . "mailto:")))
+    ("a:tel"         :tag "a"      :attrs (("href" . "tel:+")))
+    ;; Stylesheet and script
+    ("link:css"      :tag "link"   :attrs (("rel" . "stylesheet") ("href" . "")))
+    ("link:favicon"  :tag "link"   :attrs (("rel" . "icon") ("type" . "image/x-icon") ("href" . "favicon.ico")))
+    ("script:src"    :tag "script" :attrs (("src" . "")))
+    ;; Input types
+    ("inp"           :tag "input"  :attrs (("type" . "text") ("name" . "") ("id" . "")))
+    ("input:text"    :tag "input"  :attrs (("type" . "text") ("name" . "") ("id" . "")))
+    ("input:t"       :tag "input"  :attrs (("type" . "text") ("name" . "") ("id" . "")))
+    ("input:hidden"  :tag "input"  :attrs (("type" . "hidden") ("name" . "")))
+    ("input:h"       :tag "input"  :attrs (("type" . "hidden") ("name" . "")))
+    ("input:search"  :tag "input"  :attrs (("type" . "search") ("name" . "") ("id" . "")))
+    ("input:email"   :tag "input"  :attrs (("type" . "email") ("name" . "") ("id" . "")))
+    ("input:url"     :tag "input"  :attrs (("type" . "url") ("name" . "") ("id" . "")))
+    ("input:password" :tag "input" :attrs (("type" . "password") ("name" . "") ("id" . "")))
+    ("input:p"       :tag "input"  :attrs (("type" . "password") ("name" . "") ("id" . "")))
+    ("input:date"    :tag "input"  :attrs (("type" . "date") ("name" . "") ("id" . "")))
+    ("input:datetime-local" :tag "input" :attrs (("type" . "datetime-local") ("name" . "") ("id" . "")))
+    ("input:month"   :tag "input"  :attrs (("type" . "month") ("name" . "") ("id" . "")))
+    ("input:week"    :tag "input"  :attrs (("type" . "week") ("name" . "") ("id" . "")))
+    ("input:time"    :tag "input"  :attrs (("type" . "time") ("name" . "") ("id" . "")))
+    ("input:tel"     :tag "input"  :attrs (("type" . "tel") ("name" . "") ("id" . "")))
+    ("input:number"  :tag "input"  :attrs (("type" . "number") ("name" . "") ("id" . "")))
+    ("input:color"   :tag "input"  :attrs (("type" . "color") ("name" . "") ("id" . "")))
+    ("input:checkbox" :tag "input" :attrs (("type" . "checkbox") ("name" . "") ("id" . "")))
+    ("input:c"       :tag "input"  :attrs (("type" . "checkbox") ("name" . "") ("id" . "")))
+    ("input:radio"   :tag "input"  :attrs (("type" . "radio") ("name" . "") ("id" . "")))
+    ("input:r"       :tag "input"  :attrs (("type" . "radio") ("name" . "") ("id" . "")))
+    ("input:range"   :tag "input"  :attrs (("type" . "range") ("name" . "") ("id" . "")))
+    ("input:file"    :tag "input"  :attrs (("type" . "file") ("name" . "") ("id" . "")))
+    ("input:submit"  :tag "input"  :attrs (("type" . "submit") ("value" . "")))
+    ("input:s"       :tag "input"  :attrs (("type" . "submit") ("value" . "")))
+    ("input:image"   :tag "input"  :attrs (("type" . "image") ("src" . "") ("alt" . "")))
+    ("input:i"       :tag "input"  :attrs (("type" . "image") ("src" . "") ("alt" . "")))
+    ("input:button"  :tag "input"  :attrs (("type" . "button") ("value" . "")))
+    ("input:b"       :tag "input"  :attrs (("type" . "button") ("value" . "")))
+    ("input:reset"   :tag "input"  :attrs (("type" . "reset") ("value" . "")))
+    ;; Form
+    ("form:get"      :tag "form"   :attrs (("action" . "") ("method" . "get")))
+    ("form:post"     :tag "form"   :attrs (("action" . "") ("method" . "post")))
+    ;; Media
+    ("video:src"     :tag "video"  :attrs (("src" . "")))
+    ("audio:src"     :tag "audio"  :attrs (("src" . "")))
+    ;; Meta
+    ("meta:utf"      :tag "meta"   :attrs (("http-equiv" . "Content-Type") ("content" . "text/html;charset=UTF-8")))
+    ("meta:vp"       :tag "meta"   :attrs (("name" . "viewport") ("content" . "width=device-width, initial-scale=1.0")))
+    ("meta:compat"   :tag "meta"   :attrs (("http-equiv" . "X-UA-Compatible") ("content" . "IE=edge")))
+    ("meta:desc"     :tag "meta"   :attrs (("name" . "description") ("content" . "")))
+    ("meta:kw"       :tag "meta"   :attrs (("name" . "keywords") ("content" . "")))
+    )
+  "Built-in abbreviation snippets.
+Each entry is (NAME . PLIST) where PLIST contains :tag and optionally
+:attrs (an alist of default attributes).")
+
+(defconst temme--raw-snippets
+  `(("!" . ,(concat
+             "<!DOCTYPE html>\n"
+             "<html lang=\"en\">\n"
+             "<head>\n"
+             "  <meta charset=\"UTF-8\" />\n"
+             "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n"
+             "  <title>Document</title>\n"
+             "</head>\n"
+             "<body>\n"
+             "  \n"
+             "</body>\n"
+             "</html>\n"))
+    ("!!!" . ,"<!DOCTYPE html>\n")
+    ("ul+" . ,"<ul>\n  <li></li>\n</ul>\n")
+    ("ol+" . ,"<ol>\n  <li></li>\n</ol>\n")
+    ("dl+" . ,"<dl>\n  <dt></dt>\n  <dd></dd>\n</dl>\n")
+    ("table+" . ,"<table>\n  <tr>\n    <td></td>\n  </tr>\n</table>\n")
+    ("select+" . ,"<select>\n  <option value=\"\"></option>\n</select>\n")
+    ("doc" . ,(concat
+               "<!DOCTYPE html>\n"
+               "<html lang=\"en\">\n"
+               "<head>\n"
+               "  <meta charset=\"UTF-8\" />\n"
+               "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n"
+               "  <title>Document</title>\n"
+               "</head>\n"
+               "<body>\n"
+               "  \n"
+               "</body>\n"
+               "</html>\n")))
+  "Snippets that expand to raw HTML strings.
+These are only matched when the entire abbreviation is the snippet name.")
+
+(defun temme--resolve-snippet (name)
+  "Look up NAME in the snippet table and return its plist, or nil."
+  (cdr (assoc name temme--snippets)))
 
 (defconst temme-void-tags
   '("area" "base" "br" "col" "embed" "hr" "img" "input" "link"
@@ -319,15 +463,22 @@
         (_
          (setq pos (temme--skip-space input pos))
          (setq done t))))
-    (cons (make-temme-node :tag (or tag temme-default-tag)
-                           :id id
-                           :classes (nreverse classes)
-                           :attrs attrs
-                           :text text
-                           :repeat repeat
-                           :self-closing self-closing
-                           :children nil)
-          pos)))
+    (let* ((resolved-tag (or tag temme-default-tag))
+           (snippet (and tag (temme--resolve-snippet tag))))
+      (when snippet
+        (setq resolved-tag (plist-get snippet :tag))
+        (let ((snippet-attrs (plist-get snippet :attrs)))
+          (when snippet-attrs
+            (setq attrs (append snippet-attrs attrs)))))
+      (cons (make-temme-node :tag resolved-tag
+                             :id id
+                             :classes (nreverse classes)
+                             :attrs attrs
+                             :text text
+                             :repeat repeat
+                             :self-closing self-closing
+                             :children nil)
+            pos))))
 
 (defun temme--parse-primary (input pos)
   "Parse a primary expression from INPUT starting at POS."
@@ -502,11 +653,17 @@
 (defun temme-expand-string (abbrev &optional base-indent)
   "Expand ABBREV into HTML.
 BASE-INDENT is the number of spaces to prepend to top-level elements."
-  (mapconcat
-   (lambda (node)
-     (temme-render-node node (or base-indent 0)))
-   (temme-parse abbrev)
-   ""))
+  (let ((raw (cdr (assoc abbrev temme--raw-snippets))))
+    (if raw
+        (if (and base-indent (> base-indent 0))
+            (let ((prefix (temme--indent-string base-indent)))
+              (replace-regexp-in-string "^\\(.\\)" (concat prefix "\\1") raw))
+          raw)
+      (mapconcat
+       (lambda (node)
+         (temme-render-node node (or base-indent 0)))
+       (temme-parse abbrev)
+       ""))))
 
 (defun temme--bounds-of-abbrev ()
   "Return the bounds of the abbreviation around point."
