@@ -240,4 +240,73 @@
   (should (equal (temme-expand-string "li.item$")
                  "<li class=\"item1\"></li>\n")))
 
+;; --- Field navigation tests ---
+
+(defmacro temme-test-with-expansion (abbrev &rest body)
+  "Expand ABBREV in a temp buffer with `temme-mode' and run BODY."
+  (declare (indent 1))
+  `(with-temp-buffer
+     (temme-mode 1)
+     (insert ,abbrev)
+     (temme-expand)
+     ,@body))
+
+(ert-deftest temme-fields-a-link ()
+  "a:link should create fields for href value and tag content."
+  (temme-test-with-expansion "a:link"
+    (should temme-field-mode)
+    (should (= (length temme--fields) 2))
+    ;; First field: after https:// in href
+    (should (= temme--field-index 0))
+    (should (looking-back "https://" (line-beginning-position)))
+    ;; TAB to tag content
+    (temme-next-field)
+    (should (= temme--field-index 1))
+    (should (looking-back ">" (line-beginning-position)))
+    (should (looking-at "</a>"))
+    ;; TAB past last exits field mode
+    (temme-next-field)
+    (should-not temme-field-mode)))
+
+(ert-deftest temme-fields-input-text ()
+  "input:text should create fields for name and id."
+  (temme-test-with-expansion "input:text"
+    (should temme-field-mode)
+    ;; type="text" is not a field; name="" and id="" are.
+    (should (= (length temme--fields) 2))))
+
+(ert-deftest temme-fields-none-for-plain-tag ()
+  "A plain tag like div should not activate field mode."
+  (temme-test-with-expansion "div"
+    ;; div expands to <div></div> — the empty content IS a field
+    (should temme-field-mode)
+    (should (= (length temme--fields) 1))
+    (should (looking-back ">" (line-beginning-position)))
+    (should (looking-at "</div>"))))
+
+(ert-deftest temme-fields-prev-field ()
+  "S-TAB should move to previous field."
+  (temme-test-with-expansion "a:link"
+    (temme-next-field)
+    (should (= temme--field-index 1))
+    (temme-prev-field)
+    (should (= temme--field-index 0))
+    ;; prev at first field stays put
+    (temme-prev-field)
+    (should (= temme--field-index 0))))
+
+(ert-deftest temme-fields-exit-clears ()
+  "Exiting field mode should clear all markers."
+  (temme-test-with-expansion "a:link"
+    (temme-exit-fields)
+    (should-not temme-field-mode)
+    (should (null temme--fields))))
+
+(ert-deftest temme-fields-form-post ()
+  "form:post should have a field for the empty action value."
+  (temme-test-with-expansion "form:post"
+    (should temme-field-mode)
+    ;; action="" is a field, method="post" is not, and <form></form> content is
+    (should (= (length temme--fields) 2))))
+
 ;;; test-temme-mode.el ends here

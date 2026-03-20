@@ -694,6 +694,89 @@ BASE-INDENT is the number of spaces to prepend to top-level elements."
        (temme-parse abbrev)
        ""))))
 
+;;; Field navigation ---------------------------------------------------------
+
+(defvar-local temme--fields nil
+  "List of markers at fillable positions in the last expansion.")
+
+(defvar-local temme--field-index -1
+  "Index of the currently active field.")
+
+(defvar temme-field-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "TAB") #'temme-next-field)
+    (define-key map (kbd "<tab>") #'temme-next-field)
+    (define-key map (kbd "<backtab>") #'temme-prev-field)
+    (define-key map (kbd "C-g") #'temme-exit-fields)
+    map)
+  "Keymap active while navigating snippet fields.")
+
+(define-minor-mode temme-field-mode
+  "Transient mode for navigating Temme snippet fields with TAB."
+  :lighter " T»"
+  :keymap temme-field-mode-map)
+
+(defun temme--clear-fields ()
+  "Remove all field markers and exit field mode."
+  (dolist (m temme--fields)
+    (set-marker m nil))
+  (setq temme--fields nil
+        temme--field-index -1)
+  (when temme-field-mode
+    (temme-field-mode -1)))
+
+(defun temme--collect-fields (start end)
+  "Find fillable positions between START and END and return markers.
+Fillable positions are empty attribute values, attribute values ending
+in a prefix like \":\" or \"://\", and empty tag content."
+  (let (markers)
+    (save-excursion
+      ;; Attribute values that are empty or end with a prefix character.
+      (goto-char start)
+      (while (re-search-forward "=\"\\([^\"]*\\)\"" end t)
+        (let ((val (match-string 1)))
+          (when (or (string-empty-p val)
+                    (string-match-p "[:/+]\\'" val))
+            (push (copy-marker (match-end 1)) markers))))
+      ;; Empty tag content: ></tag>
+      (goto-char start)
+      (while (re-search-forward ">\\(\\)</" end t)
+        (push (copy-marker (match-beginning 1)) markers)))
+    (nreverse markers)))
+
+(defun temme--activate-fields (start end)
+  "Set up field navigation for the region START..END."
+  (temme--clear-fields)
+  (setq temme--fields (temme--collect-fields start end))
+  (when temme--fields
+    (setq temme--field-index 0)
+    (temme-field-mode 1)
+    (goto-char (car temme--fields))))
+
+(defun temme-next-field ()
+  "Jump to the next field, or exit if on the last one."
+  (interactive)
+  (let ((next (1+ temme--field-index)))
+    (if (>= next (length temme--fields))
+        (temme-exit-fields)
+      (setq temme--field-index next)
+      (goto-char (nth next temme--fields)))))
+
+(defun temme-prev-field ()
+  "Jump to the previous field."
+  (interactive)
+  (let ((prev (1- temme--field-index)))
+    (when (>= prev 0)
+      (setq temme--field-index prev)
+      (goto-char (nth prev temme--fields)))))
+
+(defun temme-exit-fields ()
+  "Exit field navigation."
+  (interactive)
+  (temme--clear-fields))
+
+;;; Expansion ----------------------------------------------------------------
+
 (defun temme--bounds-of-abbrev ()
   "Return the bounds of the abbreviation around point."
   (save-excursion
@@ -726,7 +809,9 @@ BASE-INDENT is the number of spaces to prepend to top-level elements."
     (let ((expansion (temme-expand-string abbrev base-indent)))
       (delete-region insert-start end)
       (goto-char insert-start)
-      (insert expansion))))
+      (let ((exp-start (point)))
+        (insert expansion)
+        (temme--activate-fields exp-start (point))))))
 
 ;;;###autoload
 (define-minor-mode temme-mode
