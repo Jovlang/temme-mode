@@ -18,6 +18,7 @@ Emmet-style abbreviations from scratch.
 - Indented output starting at the current line indentation
 - Built-in snippets for common patterns (`!`, `btn`, `a:link`, `link:css`, `input:text`, etc.)
 - Interactive expansion command: `M-x temme-expand` or `C-c ,`
+- Post-expansion field navigation: TAB through empty attributes and tag content (`temme-field-mode`)
 
 ## Examples
 
@@ -253,6 +254,31 @@ btn.primary{Submit}
 | `meta:compat` | `<meta http-equiv="X-UA-Compatible" content="IE=edge" />` |
 | `meta:desc` | `<meta name="description" content="" />` |
 | `meta:kw` | `<meta name="keywords" content="" />` |
+
+## Field navigation
+
+After expanding a snippet, `temme-field-mode` activates automatically and
+lets you TAB through fillable positions — empty attribute values, attribute
+values ending in a prefix (like `https://`), and empty tag content.
+
+| Key | Action |
+|---|---|
+| `TAB` | Jump to next field (exits after last) |
+| `S-TAB` | Jump to previous field |
+| `C-g` | Exit field navigation |
+
+For example, expanding `a:link` produces:
+
+```html
+<a href="https://"></a>
+```
+
+The cursor lands at the end of `https://` (first field). Type a URL, press
+TAB, and the cursor moves between the tags to enter link text. Pressing TAB
+again (or `C-g` at any point) exits field mode.
+
+The mode indicator ` T»` appears in the mode line while field navigation is
+active.
 
 ## Running tests
 
