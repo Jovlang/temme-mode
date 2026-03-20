@@ -702,6 +702,9 @@ BASE-INDENT is the number of spaces to prepend to top-level elements."
 (defvar-local temme--field-index -1
   "Index of the currently active field.")
 
+(defvar-local temme--field-end nil
+  "Marker at the end of the expanded snippet.")
+
 (defvar temme-field-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "TAB") #'temme-next-field)
@@ -720,8 +723,11 @@ BASE-INDENT is the number of spaces to prepend to top-level elements."
   "Remove all field markers and exit field mode."
   (dolist (m temme--fields)
     (set-marker m nil))
+  (when temme--field-end
+    (set-marker temme--field-end nil))
   (setq temme--fields nil
-        temme--field-index -1)
+        temme--field-index -1
+        temme--field-end nil)
   (when temme-field-mode
     (temme-field-mode -1)))
 
@@ -749,7 +755,8 @@ in a prefix like \":\" or \"://\", and empty tag content."
   (temme--clear-fields)
   (setq temme--fields (temme--collect-fields start end))
   (when temme--fields
-    (setq temme--field-index 0)
+    (setq temme--field-index 0
+          temme--field-end (copy-marker end))
     (temme-field-mode 1)
     (goto-char (car temme--fields))))
 
@@ -758,7 +765,10 @@ in a prefix like \":\" or \"://\", and empty tag content."
   (interactive)
   (let ((next (1+ temme--field-index)))
     (if (>= next (length temme--fields))
-        (temme-exit-fields)
+        (progn
+          (when temme--field-end
+            (goto-char temme--field-end))
+          (temme-exit-fields))
       (setq temme--field-index next)
       (goto-char (nth next temme--fields)))))
 

@@ -263,7 +263,7 @@ values ending in a prefix (like `https://`), and empty tag content.
 
 | Key | Action |
 |---|---|
-| `TAB` | Jump to next field (exits after last) |
+| `TAB` | Jump to next field (moves past the expansion and exits after last) |
 | `S-TAB` | Jump to previous field |
 | `C-g` | Exit field navigation |
 
@@ -274,8 +274,8 @@ For example, expanding `a:link` produces:
 ```
 
 The cursor lands at the end of `https://` (first field). Type a URL, press
-TAB, and the cursor moves between the tags to enter link text. Pressing TAB
-again (or `C-g` at any point) exits field mode.
+TAB, and the cursor moves between the tags to enter link text. TAB after the
+last field (or `C-g` at any point) exits field mode.
 
 The mode indicator ` T»` appears in the mode line while field navigation is
 active.
