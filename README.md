@@ -1,7 +1,9 @@
 # temme-mode
 
-`temme-mode` is an Emacs minor mode that expands short CSS-selector-like
-abbreviations into full HTML. Type `ul>li.item$*3`, hit `C-c ,`, and get:
+`temme-mode` is an Emacs minor mode for writing HTML without typing it all
+out by hand. Instead of manually opening and closing every tag, you type a
+short abbreviation, hit `C-c ,`, and get the full markup. For example,
+`ul>li.item$*3` expands to:
 
 ```html
 <ul>
@@ -11,10 +13,14 @@ abbreviations into full HTML. Type `ul>li.item$*3`, hit `C-c ,`, and get:
 </ul>
 ```
 
-It supports nesting, siblings, grouping, multipliers, numbering, text content,
-lorem ipsum generation, and a library of built-in snippets — all from a single
-compact abbreviation. After expansion, TAB through empty attributes and tag
-content to fill them in.
+The abbreviation syntax is compact but expressive: `>` nests tags, `+` adds
+siblings, `*3` repeats, `.class` and `#id` set attributes, and `{text}` adds
+content — so a single line can describe an entire block of markup. After
+expansion, TAB through empty attributes and tag content to fill them in.
+
+Built-in snippets cover common patterns too: `!` expands a full HTML5
+boilerplate, `a:link` gives you an `<a>` with an `href`, `input:email`
+produces a ready-made email input, and so on.
 
 This is a from-scratch rewrite of
 [emmet-mode](https://github.com/smihica/emmet-mode) with a clean single-file
