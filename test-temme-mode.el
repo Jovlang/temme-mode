@@ -444,4 +444,43 @@
       (should-not (string= (string-trim (nth 0 lines))
                             (string-trim (nth 1 lines)))))))
 
+;;; Advanced text tests -------------------------------------------------------
+
+(ert-deftest temme-expand-nested-braces-in-text ()
+  "Inner {} are preserved literally in text content."
+  (should (equal (temme-expand-string "p{Hello {name}}")
+                 "<p>Hello {name}</p>"))
+  (should (equal (temme-expand-string "span{a{b}c}")
+                 "<span>a{b}c</span>"))
+  (should (equal (temme-expand-string "p{{nested}}")
+                 "<p>{nested}</p>")))
+
+(ert-deftest temme-expand-standalone-text-node ()
+  "A bare {text} with no element modifiers renders as raw text."
+  (should (equal (temme-expand-string "{Hello}")
+                 "Hello"))
+  (should (equal (temme-expand-string "{<em>raw</em>}")
+                 "&lt;em&gt;raw&lt;/em&gt;")))
+
+(ert-deftest temme-expand-text-node-child ()
+  "A {text} child inside a parent renders inline."
+  (should (equal (temme-expand-string "div>{Hello}")
+                 "<div>Hello</div>"))
+  (should (equal (temme-expand-string "p>{Hi}+em{there}")
+                 "<p>Hi<em>there</em></p>"))
+  (should (equal (temme-expand-string "a>{Click }+em{here}+{ now}")
+                 "<a>Click <em>here</em> now</a>")))
+
+(ert-deftest temme-expand-text-node-numbering ()
+  "Numbering works in standalone text nodes."
+  (should (equal (temme-expand-string "{item $}*3")
+                 (concat "item 1\n"
+                         "item 2\n"
+                         "item 3"))))
+
+(ert-deftest temme-expand-mixed-content-with-repeated-elements ()
+  "Repeated elements inside mixed content render correctly inline."
+  (should (equal (temme-expand-string "p>{start }+em*2{$}+{ end}")
+                 "<p>start <em>1</em><em>2</em> end</p>")))
+
 ;;; test-temme-mode.el ends here

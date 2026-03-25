@@ -25,10 +25,11 @@
 ;; codebase while implementing all the useful features of Emmet (WIP).
 ;;
 ;; Supported features include plain tags, `#id' and `.class' shorthands,
-;; bracket attributes, text nodes, child/sibling/climb-up operators,
-;; grouping, multipliers, item numbering, indentation-aware expansion, self-closing
-;; output for void HTML elements or explicit `.../' abbreviations,
-;; and built-in snippets for common patterns.
+;; bracket attributes, text nodes (including nested braces and mixed inline
+;; content), child/sibling/climb-up operators, grouping, multipliers, item
+;; numbering, indentation-aware expansion, self-closing output for void HTML
+;; elements or explicit `.../' abbreviations, and built-in snippets for
+;; common patterns.
 ;;
 ;; Examples:
 ;;
@@ -37,6 +38,8 @@
 ;;   #root.card                       => default tag with id/class shorthand
 ;;   ul>li.item$*3                    => numbered repeated children
 ;;   h1.title{Hello}+p{World}         => siblings with text nodes
+;;   a>{Click }+em{here}              => mixed inline content
+;;   p{Hello {name}}                  => nested braces preserved literally
 ;;   div>section>p^aside              => climb up to add a sibling higher up
 ;;   div>(header>h1{Title})+p{Body}   => grouped nested layout
 ;;   (header+main)>p                  => children added to each group root
@@ -217,6 +220,10 @@ These are only matched when the entire abbreviation is the snippet name.")
     "meta" "param" "source" "track" "wbr")
   "HTML tags that should render without a closing tag.")
 
+(defconst temme--text-node 'temme--text-node
+  "Sentinel tag value for pure text nodes (bare {…} syntax with no element modifiers).
+These nodes render their text content directly without any wrapping HTML tag.")
+
 (defconst temme--lorem-words
   ["lorem" "ipsum" "dolor" "sit" "amet" "consectetur"
    "adipisicing" "elit" "ab" "accusantium" "accusamus"
@@ -310,15 +317,18 @@ OFFSET shifts the starting position in the word pool for variety."
     (cons (substring input start pos) pos)))
 
 (defun temme--parse-text (input pos)
-  "Parse text between braces.  Nested braces are not supported."
-  (let ((start (1+ pos)))
-    (setq pos start)
-    (while (and (< pos (length input))
-                (not (eq (aref input pos) ?})))
+  "Parse text between braces.  Nested braces are preserved literally."
+  (let ((start (1+ pos))
+        (depth 1))
+    (setq pos (1+ pos))
+    (while (and (< pos (length input)) (> depth 0))
+      (pcase (aref input pos)
+        (?{ (cl-incf depth))
+        (?} (cl-decf depth)))
       (setq pos (1+ pos)))
-    (unless (< pos (length input))
+    (unless (= depth 0)
       (error "Unterminated text block"))
-    (cons (substring input start pos) (1+ pos))))
+    (cons (substring input start (1- pos)) pos)))
 
 (defun temme--parse-number (input pos)
   "Parse a decimal repeat count from INPUT starting at POS."
@@ -501,12 +511,19 @@ OFFSET shifts the starting position in the word pool for variety."
 
 (defun temme--resolve-implicit-tags (nodes &optional parent-tag)
   "Walk NODES resolving nil tags based on PARENT-TAG context.
-Modifies nodes in place."
+Modifies nodes in place.  Nil-tag nodes that carry only text (no id,
+classes, or attrs) become `temme--text-node'; all other nil-tag nodes
+resolve to the context-appropriate implicit element tag."
   (dolist (node nodes)
     (when (null (temme-node-tag node))
       (setf (temme-node-tag node)
-            (or (cdr (assoc parent-tag temme--implicit-tag-map))
-                temme-default-tag)))
+            (if (and (temme-node-text node)
+                     (not (temme-node-id node))
+                     (not (temme-node-classes node))
+                     (not (temme-node-attrs node)))
+                temme--text-node
+              (or (cdr (assoc parent-tag temme--implicit-tag-map))
+                  temme-default-tag))))
     (temme--resolve-implicit-tags (temme-node-children node)
                                   (temme-node-tag node))))
 
@@ -745,17 +762,60 @@ COUNT is the total repeat count, needed for reverse numbering (`$@-')."
    :self-closing (temme-node-self-closing node)
    :children (temme-node-children node)))
 
+(defun temme--render-inline (node &optional effective-index)
+  "Render NODE as an inline string with no indentation or trailing newline.
+EFFECTIVE-INDEX is the repeat index passed down from a parent context.
+Handles repetition, numbering, and text nodes."
+  (let ((count (max 0 (temme-node-repeat node)))
+        parts)
+    (dotimes (i count)
+      (let* ((idx (1+ i))
+             (n (temme--number-node node idx count))
+             (tag (temme-node-tag n))
+             (text (temme-node-text n))
+             (children (temme-node-children n))
+             (self-closing (or (temme-node-self-closing n)
+                               (and (stringp tag)
+                                    (member-ignore-case tag temme-void-tags)))))
+        (push
+         (cond
+          ((eq tag temme--text-node)
+           (temme--escape-text (or text "")))
+          (children
+           (format "<%s%s>%s</%s>"
+                   tag
+                   (temme--render-attrs n)
+                   (mapconcat
+                    (lambda (c)
+                      (temme--render-inline c (if (> count 1) idx effective-index)))
+                    children "")
+                   tag))
+          (self-closing
+           (format "<%s%s />" tag (temme--render-attrs n)))
+          (t
+           (format "<%s%s>%s</%s>"
+                   tag
+                   (temme--render-attrs n)
+                   (if text (temme--escape-text text) "")
+                   tag)))
+         parts)))
+    (apply #'concat (nreverse parts))))
+
 (defun temme--render-once (node indent &optional repeat-index)
   "Render NODE once at INDENT spaces, ignoring its repeat count.
 REPEAT-INDEX is the 1-based repetition index, used to vary lorem text."
-  (let ((tag (temme-node-tag node))
-        (text (temme-node-text node))
-        (children (temme-node-children node))
-        (self-closing (or (temme-node-self-closing node)
-                          (member-ignore-case (temme-node-tag node)
-                                              temme-void-tags)))
-        (lorem-count (temme--lorem-p (temme-node-tag node))))
+  (let* ((tag (temme-node-tag node))
+         (text (temme-node-text node))
+         (children (temme-node-children node))
+         (self-closing (or (temme-node-self-closing node)
+                           (and (stringp tag)
+                                (member-ignore-case tag temme-void-tags))))
+         (lorem-count (and (stringp tag) (temme--lorem-p tag))))
     (cond
+     ((eq tag temme--text-node)
+      (format "%s%s\n"
+              (temme--indent-string indent)
+              (temme--escape-text (or text ""))))
      (lorem-count
       (format "%s%s\n"
               (temme--indent-string indent)
@@ -764,6 +824,17 @@ REPEAT-INDEX is the 1-based repetition index, used to vary lorem text."
                (* (1- (or repeat-index 1)) lorem-count))))
      ((and text children)
       (error "Mixed text and child elements are not supported"))
+     ((and children
+           (seq-some (lambda (c) (eq (temme-node-tag c) temme--text-node))
+                     children))
+      (format "%s<%s%s>%s</%s>\n"
+              (temme--indent-string indent)
+              tag
+              (temme--render-attrs node)
+              (mapconcat
+               (lambda (child) (temme--render-inline child repeat-index))
+               children "")
+              tag))
      (children
         (format "%s<%s%s>\n%s%s</%s>\n"
                 (temme--indent-string indent)

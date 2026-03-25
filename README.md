@@ -50,7 +50,9 @@ pipeline. Work in progress.
 - Multipliers: `li*3`
 - Item numbering: `li.item$*3` (`$` = sequential, `$$` = zero-padded, `$@N` = offset start, `$@-` = reverse)
 - Implicit tags inferred from parent context: `ul>.item` → `li`, `tr>.cell` → `td`, `select>.opt` → `option`
-- Text nodes: `p{Hello}`
+- Text nodes: `p{Hello}`, with nested braces preserved literally: `p{Hello {name}}`
+- Mixed inline content: `a>{Click }+em{here}` — text nodes and elements as siblings, rendered inline
+- Standalone text nodes: `{raw text}` outputs the text directly with no wrapping element
 - Indented output starting at the current line indentation
 - Lorem ipsum placeholder text: `lorem`, `lorem10`, `p>lorem5`
 - Built-in snippets for common patterns (`!`, `btn`, `a:link`, `link:css`, `input:text`, etc.)
@@ -290,6 +292,42 @@ Output:
     Sit amet consectetur.
   </li>
 </ul>
+```
+
+Mixed inline content — text nodes and elements as siblings inside a parent:
+
+```text
+a>{Click }+em{here}+{ to continue}
+```
+
+Output:
+
+```html
+<a>Click <em>here</em> to continue</a>
+```
+
+Nested braces are preserved literally in text content:
+
+```text
+p{Hello {name}, welcome!}
+```
+
+Output:
+
+```html
+<p>Hello {name}, welcome!</p>
+```
+
+Standalone text node (no wrapping element):
+
+```text
+{Just some text}
+```
+
+Output:
+
+```text
+Just some text
 ```
 
 Implicit tags inferred from parent context:
