@@ -1003,11 +1003,28 @@ field markers \"|\"."
 ;;; Expansion ----------------------------------------------------------------
 
 (defun temme--bounds-of-abbrev ()
-  "Return the bounds of the abbreviation around point."
+  "Return the bounds of the abbreviation around point.
+Spaces inside brace groups {…} do not terminate the abbreviation."
   (save-excursion
-    (skip-chars-backward "^ \t\n\r")
-    (let ((start (point)))
-      (skip-chars-forward "^ \t\n\r")
+    (let ((depth 0))
+      (while (and (> (point) (point-min))
+                  (let ((c (char-before)))
+                    (or (> depth 0)
+                        (not (memq c '(?\s ?\t ?\n ?\r))))))
+        (let ((c (char-before)))
+          (cond ((eq c ?\}) (setq depth (1+ depth)))
+                ((eq c ?\{) (setq depth (max 0 (1- depth)))))
+          (forward-char -1))))
+    (let ((start (point))
+          (depth 0))
+      (while (and (< (point) (point-max))
+                  (let ((c (char-after)))
+                    (or (> depth 0)
+                        (not (memq c '(?\s ?\t ?\n ?\r))))))
+        (let ((c (char-after)))
+          (cond ((eq c ?\{) (setq depth (1+ depth)))
+                ((eq c ?\}) (setq depth (max 0 (1- depth)))))
+          (forward-char 1)))
       (cons start (point)))))
 
 (defun temme-expand ()
