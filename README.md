@@ -71,24 +71,6 @@ Output:
 <div id="root" class="card"></div>
 ```
 
-Implicit tags inferred from parent context:
-
-```text
-ul>.item$*3
-```
-
-Output:
-
-```html
-<ul>
-  <li class="item1"></li>
-  <li class="item2"></li>
-  <li class="item3"></li>
-</ul>
-```
-
-The parent tag determines the implicit child tag: `ul`/`ol` → `li`, `table`/`tbody`/`thead`/`tfoot` → `tr`, `tr` → `td`, `colgroup` → `col`, `select`/`datalist`/`optgroup` → `option`. Any other parent defaults to `div`.
-
 Repeated children with numbering:
 
 ```text
@@ -261,6 +243,24 @@ Output:
   </li>
 </ul>
 ```
+
+Implicit tags inferred from parent context:
+
+```text
+ul>.item$*3
+```
+
+Output:
+
+```html
+<ul>
+  <li class="item1"></li>
+  <li class="item2"></li>
+  <li class="item3"></li>
+</ul>
+```
+
+The parent tag determines the implicit child tag: `ul`/`ol` → `li`, `table`/`tbody`/`thead`/`tfoot` → `tr`, `tr` → `td`, `colgroup` → `col`, `select`/`datalist`/`optgroup` → `option`. Any other parent defaults to `div`.
 
 ## Snippets
 
