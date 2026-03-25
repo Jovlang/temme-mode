@@ -23,7 +23,7 @@ Everything lives in `temme-mode.el`. Key sections in order:
 1. **Snippets** — `temme--snippets` (tag aliases + element snippets with default attrs) and `temme--raw-snippets` (full HTML string expansions like `!`, `doc`, `ul+`)
 2. **Lorem** — `temme--lorem-words` word pool, `temme--lorem-p` predicate, `temme--lorem-generate` function
 3. **Parser** — recursive descent: `temme--parse-expression` → `temme--parse-primary` → `temme--parse-element`. Produces `temme-node` structs assembled into `temme-fragment` structs
-4. **Renderer** — `temme-render-node` → `temme--render-once`. Handles numbering (`$`), lorem expansion, indentation
+4. **Renderer** — `temme-render-node` → `temme--render-once`. Handles numbering (`$`, `$$`, `$@N` offset), lorem expansion, indentation
 5. **Field navigation** — `temme-field-mode`, a transient minor mode. `temme--collect-fields` finds fillable positions (empty attrs, prefix attrs, empty tag content, explicit `|` markers). TAB/S-TAB cycle fields
 6. **Interactive command** — `temme-expand` reads abbreviation from point, expands, inserts, activates fields
 

@@ -48,7 +48,7 @@ pipeline. Work in progress.
 - Child, sibling, and climb-up operators: `>`, `+`, `^`
 - Grouping, including multi-root group children: `(header+main)>p`
 - Multipliers: `li*3`
-- Item numbering: `li.item$*3` (`$` = sequential, `$$` = zero-padded)
+- Item numbering: `li.item$*3` (`$` = sequential, `$$` = zero-padded, `$@N` = offset start)
 - Text nodes: `p{Hello}`
 - Indented output starting at the current line indentation
 - Lorem ipsum placeholder text: `lorem`, `lorem10`, `p>lorem5`
