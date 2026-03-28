@@ -1067,7 +1067,7 @@ Spaces inside brace groups {…} do not terminate the abbreviation."
             (define-key map (kbd "C-c .") #'temme-css-expand)
             map))
 
-(autoload 'temme-css-expand "temme-css" "Expand CSS abbreviation at point." t)
+(load (expand-file-name "temme-css" (file-name-directory (or load-file-name buffer-file-name))))
 
 (provide 'temme-mode)
 

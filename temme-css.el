@@ -440,7 +440,8 @@ A hyphen is a separator unless it is at the start or follows another hyphen."
       (let ((indented (concat (make-string base-indent ?\s) expansion)))
         (delete-region insert-start end)
         (goto-char insert-start)
-        (insert indented)))))
+        (insert indented)
+        (backward-char)))))
 
 (provide 'temme-css)
 
