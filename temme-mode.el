@@ -1394,7 +1394,9 @@ Spaces inside brace groups {…} do not terminate the abbreviation."
                (abbrev (string-trim (buffer-substring-no-properties start end))))
     (when (string-empty-p abbrev)
       (user-error "No abbreviation at point"))
-    (let ((expansion (or (temme-css-expand-string abbrev)
+    (let ((expansion (or (let ((css (temme-css-expand-string abbrev)))
+                           (when css
+                             (concat (make-string base-indent ?\s) css)))
                          (temme-expand-string abbrev base-indent))))
       (delete-region insert-start end)
       (goto-char insert-start)

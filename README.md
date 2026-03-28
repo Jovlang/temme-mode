@@ -448,8 +448,8 @@ Common property + value combinations have dedicated abbreviations:
 
 ### Property prefix table
 
-Type any property prefix without a value to get an empty declaration ready
-to fill in (e.g., `bg` → `background: ;`). Common prefixes:
+Add a value after any property prefix to expand it (e.g., `bg#f00` →
+`background: #f00;`). Bare prefixes fall through to HTML. Common prefixes:
 
 | Prefix | Property |
 |---|---|
