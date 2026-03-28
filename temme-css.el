@@ -417,9 +417,10 @@ A hyphen is a separator unless it is at the start or follows another hyphen."
 (defun temme-css-expand ()
   "Expand the CSS abbreviation at point."
   (interactive)
-  (let* ((bounds (bounds-of-thing-at-point 'symbol))
-         (start (or (car bounds) (point)))
-         (end (or (cdr bounds) (point)))
+  (let* ((end (point))
+         (start (save-excursion
+                  (skip-chars-backward "a-zA-Z0-9#._%-")
+                  (point)))
          (base-indent (save-excursion
                         (goto-char start)
                         (current-indentation)))
