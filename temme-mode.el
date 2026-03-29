@@ -1,6 +1,7 @@
 ;;; temme-mode.el --- Emmet rewrite for Emacs -*- lexical-binding: t; -*-
 
-;; Author: Lycomedes1814, GPT-5.4, Opus 4.6
+;; Author: Lycomedes1814 <lycomedes@proton.me>
+;; Maintainer: Lycomedes1814 <lycomedes@proton.me>
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: convenience, editing
@@ -1020,7 +1021,6 @@ field markers \"|\"."
     ("mi"   . "margin-inline")
     ("mis"  . "margin-inline-start")
     ("mie"  . "margin-inline-end")
-    ("mb"   . "margin-bottom")
     ;; Padding
     ("p"    . "padding")
     ("pt"   . "padding-top")

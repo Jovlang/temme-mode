@@ -612,23 +612,23 @@ btn.primary{Submit}
 | `link:css` | `<link rel="stylesheet" href="" />` |
 | `link:favicon` | `<link rel="icon" type="image/x-icon" href="favicon.ico" />` |
 | `script:src` | `<script src=""></script>` |
-| `inp` / `input:text` / `input:t` | `<input type="text" />` |
-| `input:hidden` / `input:h` | `<input type="hidden" />` |
-| `input:password` / `input:p` | `<input type="password" />` |
-| `input:email` | `<input type="email" />` |
-| `input:url` | `<input type="url" />` |
-| `input:search` | `<input type="search" />` |
-| `input:checkbox` / `input:c` | `<input type="checkbox" />` |
-| `input:radio` / `input:r` | `<input type="radio" />` |
-| `input:submit` / `input:s` | `<input type="submit" />` |
-| `input:button` / `input:b` | `<input type="button" />` |
-| `input:reset` | `<input type="reset" />` |
-| `input:file` | `<input type="file" />` |
-| `input:image` / `input:i` | `<input type="image" />` |
-| `input:number` | `<input type="number" />` |
-| `input:range` | `<input type="range" />` |
-| `input:date` | `<input type="date" />` |
-| `input:color` | `<input type="color" />` |
+| `inp` / `input:text` / `input:t` | `<input id="" type="text" name="" />` |
+| `input:hidden` / `input:h` | `<input type="hidden" name="" />` |
+| `input:password` / `input:p` | `<input id="" type="password" name="" />` |
+| `input:email` | `<input id="" type="email" name="" />` |
+| `input:url` | `<input id="" type="url" name="" />` |
+| `input:search` | `<input id="" type="search" name="" />` |
+| `input:checkbox` / `input:c` | `<input id="" type="checkbox" name="" />` |
+| `input:radio` / `input:r` | `<input id="" type="radio" name="" />` |
+| `input:submit` / `input:s` | `<input type="submit" value="" />` |
+| `input:button` / `input:b` | `<input type="button" value="" />` |
+| `input:reset` | `<input type="reset" value="" />` |
+| `input:file` | `<input id="" type="file" name="" />` |
+| `input:image` / `input:i` | `<input type="image" src="" alt="" />` |
+| `input:number` | `<input id="" type="number" name="" />` |
+| `input:range` | `<input id="" type="range" name="" />` |
+| `input:date` | `<input id="" type="date" name="" />` |
+| `input:color` | `<input id="" type="color" name="" />` |
 | `form:get` | `<form action="" method="get"></form>` |
 | `form:post` | `<form action="" method="post"></form>` |
 | `video:src` | `<video src=""></video>` |
