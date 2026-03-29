@@ -479,8 +479,12 @@ A hyphen is a separator unless it is at the start or follows another hyphen."
 
 ;;; Interactive command -------------------------------------------------------
 
+(declare-function temme--activate-fields "temme-mode" (start end))
+
 (defun temme-css-expand ()
-  "Expand the CSS abbreviation at point."
+  "Expand the CSS abbreviation at point.
+After expansion, activates `temme-field-mode' if the result contains
+empty value positions, allowing TAB/S-TAB navigation between them."
   (interactive)
   (let* ((end (point))
          (start (save-excursion
@@ -503,16 +507,21 @@ A hyphen is a separator unless it is at the start or follows another hyphen."
     (let ((expansion (temme-css-expand-string abbrev)))
       (unless expansion
         (user-error "Unknown CSS abbreviation: %s" abbrev))
-      (let* ((indent-str (make-string base-indent ?\s))
-             (lines (split-string expansion "\n"))
+      ;; Place field markers at empty value positions
+      (let* ((marked (replace-regexp-in-string ": ;" ": |;" expansion))
+             (indent-str (make-string base-indent ?\s))
+             (lines (split-string marked "\n"))
              (indented (string-join
                         (mapcar (lambda (line) (concat indent-str line))
                                 lines)
                         "\n")))
         (delete-region insert-start end)
         (goto-char insert-start)
-        (insert indented)
-        (backward-char)))))
+        (let ((exp-start (point)))
+          (insert indented)
+          (if (fboundp 'temme--activate-fields)
+              (temme--activate-fields exp-start (point))
+            (backward-char)))))))
 
 (provide 'temme-css)
 

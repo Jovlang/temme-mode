@@ -643,4 +643,51 @@
                          "-moz-transition: all 0.3s ease;\n"
                          "transition: all 0.3s ease;"))))
 
+;;; CSS field navigation -------------------------------------------------------
+
+(defmacro temme-test-with-css-expansion (abbrev &rest body)
+  "Expand CSS ABBREV in a temp buffer with `temme-mode' and run BODY."
+  (declare (indent 1))
+  `(with-temp-buffer
+     (temme-mode 1)
+     (insert ,abbrev)
+     (temme-css-expand)
+     ,@body))
+
+(ert-deftest temme-css-fields-bare-prefix ()
+  "Bare prefix like `bg' should activate field mode at empty value."
+  (temme-test-with-css-expansion "bg"
+    (should temme-field-mode)
+    (should (= (length temme--fields) 1))
+    (should (looking-back ": " (line-beginning-position)))
+    (should (looking-at ";"))
+    ;; TAB past last exits field mode
+    (temme-next-field)
+    (should-not temme-field-mode)))
+
+(ert-deftest temme-css-fields-keyword-no-fields ()
+  "Fully resolved keyword like `df' should not activate field mode."
+  (temme-test-with-css-expansion "df"
+    (should-not temme-field-mode)))
+
+(ert-deftest temme-css-fields-value-no-fields ()
+  "Property with value like `m10' should not activate field mode."
+  (temme-test-with-css-expansion "m10"
+    (should-not temme-field-mode)))
+
+(ert-deftest temme-css-fields-vendor-prefix-bare ()
+  "Vendor-prefixed bare prefix should create fields for each empty value."
+  (temme-test-with-css-expansion "-trs"
+    (should temme-field-mode)
+    ;; 4 vendor lines + 1 unprefixed = 5 fields
+    (should (= (length temme--fields) 5))
+    ;; First field is in the first vendor-prefixed line
+    (should (looking-back ": " (line-beginning-position)))
+    (should (looking-at ";"))))
+
+(ert-deftest temme-css-fields-vendor-prefix-with-value ()
+  "Vendor-prefixed with value should not activate field mode."
+  (temme-test-with-css-expansion "-bdrs10"
+    (should-not temme-field-mode)))
+
 ;;; test-temme-mode.el ends here
