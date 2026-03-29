@@ -61,10 +61,11 @@ pipeline. Work in progress.
 - Indented output starting at the current line indentation
 - Lorem ipsum placeholder text: `lorem`, `lorem10`, `p>lorem5`
 - Built-in snippets for common patterns (`!`, `btn`, `a:link`, `link:css`, `input:text`, etc.)
-- CSS property expansion (auto-detected from input): `m10` → `margin: 10px;`, `df` → `display: flex;`
+- CSS property expansion: `m10` → `margin: 10px;`, `df` → `display: flex;`
 - CSS vendor prefixes: `-trs` for all vendors, `-wm-trs` for specific vendors
 - CSS literal values: `trs:all 0.3s ease` for arbitrary value strings
-- Interactive expansion command: `M-x temme-expand` or `C-c ,`
+- Interactive HTML expansion: `M-x temme-expand` or `C-c ,`
+- Interactive CSS expansion: `M-x temme-css-expand` or `C-c .`
 - Post-expansion field navigation: TAB through empty attributes and tag content (`temme-field-mode`)
 
 ## Examples
@@ -358,10 +359,9 @@ The parent tag determines the implicit child tag: `ul`/`ol` → `li`, `table`/`t
 
 ## CSS abbreviations
 
-CSS abbreviations are detected automatically from the input — no special
-mode required. When an abbreviation matches a CSS keyword or a property
-prefix followed by a value, it expands to a CSS declaration. Bare prefixes
-like `p` or `b` fall through to HTML so they don't shadow tag names.
+CSS abbreviations have their own expansion command: `M-x temme-css-expand`
+or `C-c .`. When an abbreviation matches a CSS keyword or a property prefix
+(with or without a value), it expands to a CSS declaration.
 
 ```text
 m10
@@ -521,8 +521,9 @@ numeric:
 
 ### Property prefix table
 
-Add a value after any property prefix to expand it (e.g., `bg#f00` →
-`background: #f00;`). Bare prefixes fall through to HTML. Common prefixes:
+Any property prefix expands to a declaration. With a value (e.g., `bg#f00`
+→ `background: #f00;`) or without (e.g., `bg` → `background: ;`). Common
+prefixes:
 
 | Prefix | Property |
 |---|---|
@@ -540,7 +541,7 @@ Add a value after any property prefix to expand it (e.g., `bg#f00` →
 | `bg` / `bgc` / `bgi` / `bgp` / `bgs` | `background` / `-color` / `-image` / `-position` / `-size` |
 | `bd` / `bdw` / `bds` / `bdc` / `bdrs` | `border` / `-width` / `-style` / `-color` / `-radius` |
 | `fx` / `fxd` / `fxw` / `fxg` / `fxs` / `fxb` | `flex` / `-direction` / `-wrap` / `-grow` / `-shrink` / `-basis` |
-| `ai` / `jc` | `align-items` / `justify-content` (keyword-only, use e.g. `aic`, `jcc`) |
+| `ai` / `jc` | `align-items` / `justify-content` |
 | `gtc` / `gtr` / `gta` | `grid-template-columns` / `-rows` / `-areas` |
 | `trs` / `anim` | `transition` / `animation` |
 | `cur` / `pe` / `us` | `cursor` / `pointer-events` / `user-select` |
