@@ -1,11 +1,11 @@
 ;;; temme-mode.el --- Emmet rewrite for Emacs -*- lexical-binding: t; -*-
 
-;; Author: Lycomedes1814 <lycomedes@proton.me>
-;; Maintainer: Lycomedes1814 <lycomedes@proton.me>
+;; Author: Jovlang <lycomedes@proton.me>
+;; Maintainer: Jovlang <lycomedes@proton.me>
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: convenience, editing
-;; URL: https://github.com/Lycomedes1814/temme-mode
+;; URL: https://github.com/Jovlang/temme-mode
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
